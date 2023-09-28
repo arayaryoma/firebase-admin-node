@@ -82,6 +82,20 @@ export class AppStore {
     return this.appStore.get(appName)!;
   }
 
+  public ensureApp(options?: AppOptions, appName: string = DEFAULT_APP_NAME): App {
+    let app: App;
+    try {
+      app = this.getApp(appName);
+    } catch (e) {
+      if (e instanceof FirebaseAppError && e.code === AppErrorCodes.NO_APP) {
+        app = this.initializeApp(options, appName);
+      } else {
+        throw e;
+      }
+    }
+    return app;
+  }
+
   public getApps(): App[] {
     // Return a copy so the caller cannot mutate the array
     return Array.from(this.appStore.values());
@@ -127,6 +141,10 @@ export function initializeApp(options?: AppOptions, appName: string = DEFAULT_AP
 
 export function getApp(appName: string = DEFAULT_APP_NAME): App {
   return defaultAppStore.getApp(appName);
+}
+
+export function ensureApp(options?: AppOptions, appName: string = DEFAULT_APP_NAME): App {
+  return defaultAppStore.ensureApp(options, appName);
 }
 
 export function getApps(): App[] {
